@@ -8,18 +8,16 @@ local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
 map("n", "gl", function()
   vim.diagnostic.open_float()
 end, { desc = "Open Diagnostics in Float" })
+vim.keymap.set("n", "K", vim.lsp.buf.hover)
 
 map({ "v", "n" }, "<leader>ca", require("actions-preview").code_actions)
 
--- vim way: ; goes to the direction you were moving.
-map({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move)
-map({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_opposite)
+map("n", "<Tab>", ">>")
+map("n", "<s-Tab>", "<<")
 
--- optionally, make builtin f, f, t, t also repeatable with ; and ,
-map({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
-map({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { expr = true })
-map({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
-map({ "n", "x", "o" }, "t", ts_repeat_move.builtin_t_expr, { expr = true })
+-- vim way: ; goes to the direction you were moving.
+map({ "n", "x", "o" }, "<C-;>", ts_repeat_move.repeat_last_move)
+map({ "n", "x", "o" }, "<C-,>", ts_repeat_move.repeat_last_move_opposite)
 
 map("i", "<C-b>", "<ESC>^i", { desc = "move beginning of line" })
 map("i", "<C-e>", "<End>", { desc = "move end of line" })
@@ -29,12 +27,19 @@ map("n", "<C-l>", "<C-w>l", { desc = "switch window right" })
 map("n", "<C-j>", "<C-w>j", { desc = "switch window down" })
 map("n", "<C-k>", "<C-w>k", { desc = "switch window up" })
 
+map("n", "<C-d>", "<C-d>zz", { desc = "jump down" })
+map("n", "<C-u>", "<C-u>zz", { desc = "jump up" })
+map("n", "<C-f>", "<C-f>zz", { desc = "jump down" })
+map("n", "<C-b>", "<C-b>zz", { desc = "jump up" })
+
+map("n", "Y", "yy", { desc = "yank" })
+
 map("n", "<leader>sv", "<C-w>v", { desc = "split vertically" })
-map("n", "<leader>sh", "<C-w>s", { desc = "split horizontally", remap = true })
+map("n", "<leader>sh", "<C-w>s", { desc = "split horizontally" })
 
 -- Increase/Decrease split height
-map("n", "<C-Up>", ":resize +2<CR>", { desc = "Increase split height" })
-map("n", "<C-Down>", ":resize -2<CR>", { desc = "Decrease split height" })
+map("n", "<C-Up>", ":resize +5<CR>", { desc = "Increase split height" })
+map("n", "<C-Down>", ":resize -5<CR>", { desc = "Decrease split height" })
 
 -- Increase/Decrease split width
 map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease split width" })
@@ -53,8 +58,6 @@ map("n", "<M-k>", "<cmd> cprev <CR>", { desc = "prev fix" })
 -- global lsp mappings
 map("n", "<leader>ds", vim.diagnostic.setloclist, { desc = "LSP diagnostic loclist" })
 map("n", "<leader>rn", "<leader>ra", { desc = "LSP diagnostic loclist", remap = true })
--- map("n", "<C-k>", "<C-s>", { desc = "LSP signature help", remap = true })
--- map("i", "<C-k>", "<C-s>", { desc = "LSP signature help", remap = true })
 
 map("n", "<leader>x", ":.lua<CR>", { desc = "execute" })
 map("v", "<leader>x", ":lua<CR>", { desc = "execute" })
@@ -83,6 +86,9 @@ map("n", "<leader>pt", "<cmd>Telescope terms<CR>", { desc = "telescope pick hidd
 map("n", "<leader>fc", "<cmd>Telescope grep_string<CR>", { desc = "telescope [F]ind [C]urrent word" })
 map("n", "<leader>ft", "<cmd>TodoTelescope<CR>", { desc = "telescope todo-comments" })
 
+map("n", "gF", "<cmd>Telescope lsp_document_symbols<CR>", {})
+map("n", "gW", "<cmd>Telescope lsp_workspace_symbols<CR>", {})
+
 map("n", '<leader>f"', "<cmd>Telescope registers<CR>", { desc = "telescope [F]ind registers" })
 
 map("n", "<leader>fq", "<cmd>Telescope quickfix<CR>", { desc = "telescope [F]ind [Q]uickfix" })
@@ -90,7 +96,6 @@ map("n", "<leader>fQ", "<cmd>Telescope quickfixhistory<CR>", { desc = "telescope
 
 map("n", "gR", "<cmd>Telescope lsp_references<CR>", { desc = "telescopelsp references" })
 map("n", "gI", "<cmd>Telescope lsp_implementations<CR>", { desc = "telescope implementations" })
-
 map("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", { desc = "telescope definitions" })
 
 map("n", "<leader>/", function()
@@ -172,11 +177,50 @@ map("n", "ss", substitute.line, { desc = "Substitute line" })
 map("n", "S", substitute.eol, { desc = "Substitute to end of line" })
 map("x", "s", substitute.visual, { desc = "Substitute in visual mode" })
 
+vim.keymap.set("n", "<leader>ll", ":setlocal spell spelllang=en<CR>")
+
 -- undotree
 map("n", "<leader>ut", "<cmd>UndotreeToggle<CR>", { desc = "Toggle undotree" })
 map("n", "<leader>uf", "<cmd>UndotreeFocus<CR>", { desc = "Focus undotree" })
 
 -- toggle terminal
 
+--
+
 map({ "n", "t" }, "<A-i>", "<cmd>ToggleTerm<CR>", { desc = "Floating Terminal" })
-vim.keymap.set("t", "<C-x>", [[<C-\><C-n>]], { desc = "Exit Terminal Mode" })
+map("t", "<C-x>", [[<C-\><C-n>]], { desc = "Exit Terminal Mode" })
+
+--------------HARPOON-------------------
+
+map("n", "<leader>ha", function()
+  require("harpoon"):list():add()
+end, { desc = "Harpoon [A]dd" })
+
+map("n", "<leader>hh", function()
+  local harpoon = require "harpoon"
+  harpoon.ui:toggle_quick_menu(harpoon:list())
+end, { desc = "Toggle quick menu [H]arpoon" })
+
+map("n", "<M-a>", function()
+  require("harpoon"):list():select(1)
+end, { desc = "Select 1 menu [H]arpoon" })
+
+map("n", "<M-z>", function()
+  require("harpoon"):list():select(2)
+end, { desc = "select 2 menu [h]arpoon" })
+
+map("n", "<M-e>", function()
+  require("harpoon"):list():select(3)
+end, { desc = "Select 3 menu [H]arpoon" })
+
+map("n", "<M-r>", function()
+  require("harpoon"):list():select(4)
+end, { desc = "Select 4 menu [H]arpoon" })
+
+map("n", "<C-S-P>", function()
+  require("harpoon"):list():prev()
+end, { desc = "Select prev menu [H]arpoon" })
+
+map("n", "<C-S-N>", function()
+  require("harpoon"):list():next()
+end, { desc = "Select next menu [H]arpoon" })
