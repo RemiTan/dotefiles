@@ -1,7 +1,7 @@
 return {
   "saghen/blink.cmp",
   -- optional: provides snippets for the snippet source
-  dependencies = { "rafamadriz/friendly-snippets" },
+  dependencies = { "rafamadriz/friendly-snippets", "L3MON4D3/LuaSnip" },
 
   -- use a release tag to download pre-built binaries
   version = "1.*",
@@ -62,13 +62,12 @@ return {
     -- channels
     keymap = {
       preset = "default",
-
-      n = {
-        ["<C-k>"] = { "show_signature", "hide_signature", "fallback" },
-        ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
-        ["<C-b>"] = { "scroll_documentation_up", "fallback" },
-        ["<C-f>"] = { "scroll_documentation_down", "fallback" },
-      },
+      ["<C-k>"] = { "show_signature", "hide_signature", "fallback" },
+      ["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
+      ["<C-b>"] = { "scroll_documentation_up", "fallback" },
+      ["<C-f>"] = { "scroll_documentation_down", "fallback" },
+      ["<Tab>"] = { "accept", "fallback" },
+      ["<CR>"] = { "accept", "fallback" },
     },
 
     appearance = {
@@ -84,6 +83,48 @@ return {
         auto_show_delay_ms = 500,
       },
       ghost_text = { enabled = vim.g.ai_cmp },
+      menu = {
+        scrollbar = true,
+        auto_show = true,
+        draw = {
+          columns = {
+            { "kind_icon" },
+            { "label", "label_description", gap = 1 },
+            { "kind", gap = 1 },
+            { "label_description", gap = 1 },
+            { "source_name", gap = 1 },
+          },
+          components = {
+            kind_icon = {
+              ellipsis = false,
+              width = { fill = true },
+              text = function(ctx)
+                local kind_icons = {
+                  Function = "λ", -- Lambda symbol for functions
+                  Method = "∂", -- Lambda symbol for methods
+                  Field = "󰀫", -- Lambda symbol for methods
+                  Variable = "󰀫", -- Lambda symbol for methods
+                  Property = "󰀫", -- Lambda symbol for methods
+                  Keyword = "k", -- Lambda symbol for methods
+                  Struct = "Π", -- Lambda symbol for methods
+                  Enum = "τ", -- Lambda symbol for methods
+                  EnumMember = "τ", -- Lambda symbol for methods
+                  Snippet = "⊂",
+                  Text = "τ",
+                  Module = "⌠",
+                  Constructor = "∑",
+                }
+
+                local icon = kind_icons[ctx.kind]
+                if icon == nil then
+                  icon = ctx.kind_icon
+                end
+                return icon
+              end,
+            },
+          },
+        },
+      },
     },
 
     -- Default list of enabled providers defined so that you can extend it
@@ -129,7 +170,7 @@ return {
           },
         },
         -- Whether to automatically show the window when new completion items are available
-        menu = { auto_show = false },
+        menu = { auto_show = true },
         -- Displays a preview of the selected item on the current line
         ghost_text = { enabled = true },
       },

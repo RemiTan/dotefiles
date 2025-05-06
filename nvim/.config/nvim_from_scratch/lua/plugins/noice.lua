@@ -34,9 +34,6 @@ return {
     redirect = {
       view = "popup",
     },
-    -- messages = {
-    --   enabled = false,
-    -- },
     notify = {
       enabled = false,
     },

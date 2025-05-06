@@ -1,5 +1,4 @@
 local M = {}
-
 -- Icon definitions for the dashboard
 M.icon = function(file, icon_type)
   local icons = {
@@ -55,12 +54,12 @@ return {
     bigfile = { enabled = true },
     explorer = { enabled = false },
     indent = { enabled = true },
-    input = { enabled = true },
+    input = { enabled = false },
     picker = { enabled = false },
     notifier = { enabled = false },
     quickfile = { enabled = true },
     scope = { enabled = true },
-    scroll = { enabled = true },
+    scroll = { enabled = false },
     statuscolumn = { enabled = true },
     words = { enabled = true },
     git = { enabled = true },

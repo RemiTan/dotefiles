@@ -28,7 +28,5 @@ return {
         update_n_lines = "<leader>sn", -- Default 'sn', remap as needed
       },
     }
-
-    require("mini.pairs").setup {}
   end,
 }
