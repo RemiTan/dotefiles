@@ -83,6 +83,9 @@ return {
         auto_show_delay_ms = 500,
       },
       ghost_text = { enabled = vim.g.ai_cmp },
+      list = {
+        selection = { preselect = false, auto_insert = false },
+      },
       menu = {
         scrollbar = true,
         auto_show = true,

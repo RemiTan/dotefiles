@@ -73,3 +73,5 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "q", "<cmd>close<CR>", opts)
   end,
 })
+
+vim.api.nvim_set_hl(0, "TelescopeNormal", { fg = "#c0caf5", bg = "#1a1b26" })
