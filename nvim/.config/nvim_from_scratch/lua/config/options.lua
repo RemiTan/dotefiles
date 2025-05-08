@@ -62,6 +62,7 @@ o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,term
 --     vim.fn.input(opts.prompt or "", opts.default or "")
 --   end
 -- end
+-- b
 --
 
 vim.api.nvim_create_autocmd("FileType", {
