@@ -6,12 +6,10 @@ local api = vim.api
 o.shiftwidth = 4
 o.tabstop = 4
 o.softtabstop = 4
-
 o.smarttab = true
 o.smartindent = true
 o.autoindent = true
 o.breakindent = true
-
 o.clipboard = "unnamedplus"
 
 o.cursorline = true
@@ -76,3 +74,9 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_set_hl(0, "TelescopeNormal", { fg = "#c0caf5" })
+
+vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpActiveParameter", {
+  fg = "#1e1e2e", -- dark background
+  bg = "#f9e2af", -- warm yellow highlight
+  bold = true,
+})

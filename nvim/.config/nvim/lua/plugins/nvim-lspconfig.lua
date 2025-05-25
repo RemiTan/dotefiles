@@ -75,11 +75,15 @@ return {
         --  This is where a variable was first declared, or where a function is defined, etc.
         --  To jump back, press <C-t>.
         map("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+        map("gD", function()
+          vim.cmd "vsplit"
+          vim.cmd "Telescope lsp_definitions"
+        end, "[G]oto [D]efinition in split buffer")
 
         -- WARN: This is not Goto Definition, this is Goto Declaration.
         --  For example, in C this would take you to the header.
-        map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
-
+        -- map("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
+        --
         -- Fuzzy find all the symbols in your current document.
         --  Symbols are things like variables, functions, types, etc.
         map("gf", require("telescope.builtin").lsp_document_symbols, "Open Document Symbols")
@@ -207,6 +211,12 @@ return {
       -- But for many setups, the LSP (`ts_ls`) will work just fine
       -- ts_ls = {},
       --
+
+      sqlls = {
+        capabilities = capabilities,
+        filetypes = { "sql" },
+      },
+
       gopls = {
         capabilities = capabilities,
         settings = {
