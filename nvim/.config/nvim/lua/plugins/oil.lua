@@ -5,7 +5,7 @@ return {
   opts = {
     view_options = {
       -- Show files and directories that start with "."
-      show_hidden = false,
+      show_hidden = true,
     },
   },
   dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if you prefer nvim-web-devicons

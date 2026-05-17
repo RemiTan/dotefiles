@@ -80,3 +80,17 @@ vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpActiveParameter", {
   bg = "#f9e2af", -- warm yellow highlight
   bold = true,
 })
+
+vim.api.nvim_create_autocmd("ModeChanged", {
+  pattern = "*:n",
+  callback = function()
+    pcall(require("copilot.suggestion").dismiss)
+  end,
+})
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    vim.api.nvim_set_hl(0, "CopilotSuggestion", { fg = "#83a598", italic = true })
+    vim.api.nvim_set_hl(0, "CopilotAnnotation", { fg = "#83a598" })
+  end,
+})

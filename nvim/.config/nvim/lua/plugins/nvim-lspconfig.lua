@@ -223,6 +223,9 @@ return {
           gopls = {
             gofumpt = true,
 
+            analysis = {
+              diagnosticMode = "workspace",
+            },
             hints = {
               assignVariableTypes = true,
               compositeLiteralFields = true,
@@ -353,6 +356,9 @@ return {
       handlers = {
         function(server_name)
           local server = servers[server_name] or {}
+          server.flags = {
+            debounce_text_changes = 150,
+          }
           -- This handles overriding only values explicitly passed
           -- by the server configuration above. Useful when disabling
           -- certain features of an LSP (for example, turning off formatting for ts_ls)

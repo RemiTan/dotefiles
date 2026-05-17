@@ -45,7 +45,7 @@ map("n", "<C-Down>", ":resize -5<CR>", { desc = "Decrease split height" })
 map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease split width" })
 map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase split width" })
 
-map("n", "<C-c>", "<Nop>", { desc = "stop flashing" })
+-- map("n", "<C-c>", "<Nop>", { desc = "stop flashing" })
 
 map("n", "<Esc>", "<cmd>noh<CR>", { desc = "general clear highlights" })
 
@@ -187,7 +187,8 @@ map("n", "<leader>uf", "<cmd>UndotreeFocus<CR>", { desc = "Focus undotree" })
 
 --
 
-map({ "n", "t" }, "<A-i>", "<cmd>ToggleTerm<CR>", { desc = "Floating Terminal" })
+map({ "n", "t" }, "<A-i>", "<cmd>1ToggleTerm direction=float <CR>", { desc = "Floating Terminal" })
+map({ "n", "t" }, "<A-v>", "<cmd>2ToggleTerm direction=vertical size=50<CR>", { desc = "Vertical Terminal" })
 map("t", "<C-x>", [[<C-\><C-n>]], { desc = "Exit Terminal Mode" })
 
 --------------HARPOON-------------------
@@ -224,3 +225,32 @@ end, { desc = "Select prev menu [H]arpoon" })
 map("n", "<C-S-N>", function()
   require("harpoon"):list():next()
 end, { desc = "Select next menu [H]arpoon" })
+
+map("i", "<M-l>", function()
+  require("copilot.suggestion").accept()
+end)
+
+map("n", "<leader>cs", function()
+  local ok, suggestion = pcall(require, "copilot.suggestion")
+  if not ok then
+    return
+  end
+
+  local state = suggestion.is_visible and suggestion.is_visible()
+
+  if state then
+    suggestion.dismiss()
+    vim.g.copilot_auto_trigger = false
+    vim.notify "Copilot OFF"
+  else
+    vim.g.copilot_auto_trigger = true
+    vim.notify "Copilot ON"
+  end
+end, { desc = "Toggle Copilot suggestions" })
+
+-- Clear copilot suggestion with Esc if visible, otherwise preserve default Esc behavior
+vim.keymap.set("n", "<esc>", function()
+  if not require("copilot-lsp.nes").clear() then
+    -- fallback to other functionality
+  end
+end, { desc = "Clear Copilot suggestion or fallback" })
