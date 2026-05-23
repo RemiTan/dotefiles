@@ -2,7 +2,7 @@ vim.keymap.set("n", "-", "<cmd>Oil --float<CR>", { desc = "Open Parent Directory
 
 local map = vim.keymap.set
 
-local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 
 -- lsp key maps
 map("n", "gl", function()

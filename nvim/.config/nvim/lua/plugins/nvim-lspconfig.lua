@@ -305,6 +305,7 @@ return {
                 reportAttributeAccessIssue = false,
                 reportArgumentType = false,
                 reportUnreachable = false,
+                reportUnannotatedClassAttribute = false,
               },
             },
           },
