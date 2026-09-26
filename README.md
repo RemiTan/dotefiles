@@ -16,3 +16,8 @@ environment. The same file can set `floating_todo_file` and
 `session_suppressed_dirs`. `copilot_node_command` is optional; leave it `nil` to
 use `node` from `PATH`, or set it if your Node.js executable has a custom path.
 Restart Neovim after changing the file.
+
+Neovim sessions are saved separately for each Git branch. Changing branches
+restores that branch's open files and layout; changing workspaces from the home
+menu saves the current workspace and restores the selected one. If a branch has
+unsaved buffer changes, AutoSession asks before replacing those buffers.
