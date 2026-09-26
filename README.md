@@ -25,6 +25,11 @@ a new branch. The dashboard also has **Switch Branch** and **Git Worktrees**
 entries. These actions write modified buffers first, including edits from LSP
 rename, then restore the target branch or workspace session.
 
+For daily navigation, use `<leader>ff` to fuzzy-find project files, `<leader>fb`
+to switch between open buffers, and `<leader>gt` to browse changed files. Use
+`<leader>gg` for Neogit staging, commits, pulls, and merges; `<leader>gd` opens
+the full Diffview and `<leader>gD` closes it.
+
 New worktrees are created under `worktrees_dir`; it defaults to `projects_dir`
 so they appear in the dashboard's **Change Workspace** picker. Git itself
 prevents checking out a branch in multiple worktrees at once.
