@@ -81,63 +81,6 @@ return {
         ---@type snacks.dashboard.Item[]
         keys = {
           { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
-          { icon = " ", key = "f", desc = "Find File", action = ":lua Snacks.dashboard.pick('files')" },
-          {
-            icon = " ",
-            key = "g",
-            desc = "Find Text",
-            action = function()
-              local pickers = require "telescope.pickers"
-              local finders = require "telescope.finders"
-              local make_entry = require "telescope.make_entry"
-              local conf = require("telescope.config").values
-              local opts = opts or {}
-              opts.cwd = opts.cwd or vim.uv.cwd()
-              local finder = finders.new_async_job {
-                command_generator = function(prompt)
-                  if not prompt or prompt == "" then
-                    return nil
-                  end
-
-                  local pieces = vim.split(prompt, "  ")
-                  local args = { "rg" }
-                  if pieces[1] then
-                    table.insert(args, "-e")
-                    table.insert(args, pieces[1])
-                  end
-
-                  if pieces[2] then
-                    table.insert(args, "-g")
-                    table.insert(args, pieces[2])
-                  end
-
-                  return vim.tbl_flatten {
-                    args,
-                    {
-                      "--color=never",
-                      "--no-heading",
-                      "--with-filename",
-                      "--line-number",
-                      "--column",
-                      "--smart-case",
-                    },
-                  }
-                end,
-                entry_maker = make_entry.gen_from_vimgrep(opts),
-                cwd = opts.cwd,
-              }
-              pickers
-                .new(opts, {
-                  debounce = 100,
-                  prompt_title = "multi grep",
-                  finder = finder,
-                  previewer = conf.grep_previewer(opts),
-                  sorter = require("telescope.sorters").empty(),
-                })
-                :find()
-            end,
-          },
-          { icon = " ", key = "o", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
           {
             icon = " ",
             key = "c",
@@ -149,6 +92,14 @@ return {
             key = "r",
             desc = "Restore Session",
             action = "<cmd> SessionRestore <CR>",
+          },
+          {
+            icon = "󰉋 ",
+            key = "w",
+            desc = "Change Workspace",
+            action = function()
+              require("config.projects").pick()
+            end,
           },
           { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy", enabled = package.loaded.lazy ~= nil },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
@@ -189,6 +140,16 @@ return {
       },
       sections = {
         { section = "header" },
+        function()
+          return {
+            text = {
+              { "Workspace: ", hl = "SnacksDashboardTitle" },
+              { vim.fn.fnamemodify(vim.fn.getcwd(), ":~"), hl = "SnacksDashboardDesc" },
+            },
+            align = "center",
+            padding = 1,
+          }
+        end,
         {
           pane = 2,
           section = "terminal",
@@ -207,7 +168,6 @@ return {
           end,
         },
         { section = "keys", gap = 1, padding = 2 },
-        { icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
         {
           pane = 2,
           icon = " ",
