@@ -6,6 +6,32 @@ local git_worktree = require "config.git_worktree"
 map("n", "<leader>gb", git_worktree.pick_branch, { desc = "Switch Git branch" })
 map("n", "<leader>gw", git_worktree.pick_worktree, { desc = "Git worktrees" })
 
+local function git_file_history()
+  local buffer = vim.api.nvim_get_current_buf()
+  local file = vim.api.nvim_buf_get_name(buffer)
+  if file == "" then
+    vim.notify("Current buffer has no file history", vim.log.levels.INFO)
+    return
+  end
+
+  local directory = vim.fn.fnamemodify(file, ":h")
+  local root = vim.fn.systemlist { "git", "-C", directory, "rev-parse", "--show-toplevel" }
+  if vim.v.shell_error ~= 0 or not root[1] then
+    vim.notify("Current file is not inside a Git repository", vim.log.levels.WARN)
+    return
+  end
+
+  require("telescope.builtin").git_bcommits {
+    cwd = root[1],
+    current_file = file,
+    bufnr = buffer,
+    winnr = vim.api.nvim_get_current_win(),
+  }
+end
+
+map("n", "<leader>gh", git_file_history, { desc = "Git file history and checkout" })
+vim.api.nvim_create_user_command("GitFileHistory", git_file_history, { desc = "Browse current file history" })
+
 local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 
 -- lsp key maps

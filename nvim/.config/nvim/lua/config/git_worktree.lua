@@ -5,7 +5,8 @@ local settings = require "config.settings"
 local function git(root, args)
   local command = { "git", "-C", root }
   vim.list_extend(command, args)
-  local output = vim.fn.systemlist(command)
+  local shell_command = table.concat(vim.tbl_map(vim.fn.shellescape, command), " ") .. " 2>&1"
+  local output = vim.fn.systemlist(shell_command)
   return output, vim.v.shell_error
 end
 
@@ -46,6 +47,53 @@ local function local_branches(root)
   return output
 end
 
+local function switch_branch(root, branch)
+  local output, code = git(root, { "switch", branch })
+  if code == 0 then
+    vim.notify("Switched to " .. branch)
+    return
+  end
+
+  local message = table.concat(output, "\n")
+  local lower_message = message:lower()
+  local has_local_changes = lower_message:find("would be overwritten", 1, true)
+    or lower_message:find("local changes", 1, true)
+    or lower_message:find("untracked working tree files", 1, true)
+  if not has_local_changes then
+    notify_git_error("Switching to " .. branch, output)
+    return
+  end
+
+  vim.ui.select({ "Stash changes and retry", "Cancel" }, {
+    prompt = "Git cannot switch branches with these local changes. Stash them and retry?",
+  }, function(choice)
+    if choice ~= "Stash changes and retry" then
+      return
+    end
+
+    local stash_output, stash_code = git(root, {
+      "stash",
+      "push",
+      "--include-untracked",
+      "-m",
+      "Neovim: switch to " .. branch,
+    })
+    if stash_code ~= 0 then
+      notify_git_error("Stashing changes", stash_output)
+      return
+    end
+
+    local retry_output, retry_code = git(root, { "switch", branch })
+    if retry_code ~= 0 then
+      notify_git_error("Switching to " .. branch .. " after stashing", retry_output)
+      vim.notify("Your changes remain saved in Git stash; apply them later with :Neogit or git stash pop")
+      return
+    end
+
+    vim.notify("Switched to " .. branch .. ". Your changes are saved in Git stash@{0}.")
+  end)
+end
+
 function M.pick_branch()
   with_repository(function(root)
     local branches = local_branches(root)
@@ -66,13 +114,7 @@ function M.pick_branch()
       if not branch or not require("config.projects").save_modified_buffers() then
         return
       end
-
-      local output, code = git(root, { "switch", branch })
-      if code ~= 0 then
-        notify_git_error("Switching to " .. branch, output)
-        return
-      end
-      vim.notify("Switched to " .. branch)
+      switch_branch(root, branch)
     end)
   end)
 end
