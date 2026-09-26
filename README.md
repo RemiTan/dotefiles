@@ -19,8 +19,8 @@ Restart Neovim after changing the file.
 
 The dashboard remains the startup view. Neovim saves sessions separately for
 each Git branch and restores them when you change branches or workspaces. Use
-`:GitBranch` or `<leader>gB` to switch branches, and `:GitWorktree` or
-`<leader>gW` to open an existing worktree or create one from a local branch or
+`:GitBranch` or `<leader>gb` to switch branches, and `:GitWorktree` or
+`<leader>gw` to open an existing worktree or create one from a local branch or
 a new branch. The dashboard also has **Switch Branch** and **Git Worktrees**
 entries. These actions write modified buffers first, including edits from LSP
 rename, then restore the target branch or workspace session.

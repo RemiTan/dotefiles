@@ -97,7 +97,7 @@ return {
           gitsigns.blame_line { full = true }
         end, { desc = "Show blame line" })
 
-        map("n", "<leader>gb", "<cmd>Gitsigns blame<CR>", { desc = "Show blame" })
+        map("n", "<leader>gB", "<cmd>Gitsigns blame<CR>", { desc = "Show blame" })
 
         map("n", "<leader>hd", gitsigns.diffthis, { desc = "Show diff" })
 

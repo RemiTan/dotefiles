@@ -3,8 +3,8 @@ vim.keymap.set("n", "-", "<cmd>Oil --float<CR>", { desc = "Open Parent Directory
 local map = vim.keymap.set
 
 local git_worktree = require "config.git_worktree"
-map("n", "<leader>gB", git_worktree.pick_branch, { desc = "Switch Git branch" })
-map("n", "<leader>gW", git_worktree.pick_worktree, { desc = "Git worktrees" })
+map("n", "<leader>gb", git_worktree.pick_branch, { desc = "Switch Git branch" })
+map("n", "<leader>gw", git_worktree.pick_worktree, { desc = "Git worktrees" })
 
 local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 
