@@ -176,10 +176,10 @@ return {
             return Snacks.git.get_root() ~= nil
           end,
           padding = 1,
-          ttl = 5 * 60,
+          ttl = 0,
           indent = 3,
           title = "Notifications",
-          cmd = "gh notify -s -a -n5",
+          cmd = [[gh api notifications --jq 'if length == 0 then "No unread notifications" else .[0:5][] | "\(.subject.title) · \(.repository.full_name)" end']],
           action = function()
             vim.ui.open "https://github.com/notifications"
           end,
