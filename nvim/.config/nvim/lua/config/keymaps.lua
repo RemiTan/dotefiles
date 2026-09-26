@@ -2,7 +2,11 @@ vim.keymap.set("n", "-", "<cmd>Oil --float<CR>", { desc = "Open Parent Directory
 
 local map = vim.keymap.set
 
-local ts_repeat_move = require "nvim-treesitter.textobjects.repeatable_move"
+local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
+require "config.git_worktree"
+
+map("n", "<leader>gb", "<cmd>GitBranch<CR>", { desc = "Switch Git branch" })
+map("n", "<leader>gw", "<cmd>GitWorktree<CR>", { desc = "Switch or create Git worktree" })
 
 -- lsp key maps
 map("n", "gl", function()
