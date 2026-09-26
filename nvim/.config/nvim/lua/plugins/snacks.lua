@@ -101,6 +101,22 @@ return {
               require("config.projects").pick()
             end,
           },
+          {
+            icon = " ",
+            key = "g",
+            desc = "Switch Branch",
+            action = function()
+              require("config.git_worktree").pick_branch()
+            end,
+          },
+          {
+            icon = "󰙅 ",
+            key = "t",
+            desc = "Git Worktrees",
+            action = function()
+              require("config.git_worktree").pick_worktree()
+            end,
+          },
           { icon = "󰒲 ", key = "L", desc = "Lazy", action = ":Lazy", enabled = package.loaded.lazy ~= nil },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
         },

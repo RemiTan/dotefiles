@@ -17,7 +17,14 @@ environment. The same file can set `floating_todo_file` and
 use `node` from `PATH`, or set it if your Node.js executable has a custom path.
 Restart Neovim after changing the file.
 
-Neovim sessions are saved separately for each Git branch. Changing branches
-restores that branch's open files and layout; changing workspaces from the home
-menu saves the current workspace and restores the selected one. If a branch has
-unsaved buffer changes, AutoSession asks before replacing those buffers.
+The dashboard remains the startup view. Neovim saves sessions separately for
+each Git branch and restores them when you change branches or workspaces. Use
+`:GitBranch` or `<leader>gB` to switch branches, and `:GitWorktree` or
+`<leader>gW` to open an existing worktree or create one from a local branch or
+a new branch. The dashboard also has **Switch Branch** and **Git Worktrees**
+entries. These actions write modified buffers first, including edits from LSP
+rename, then restore the target branch or workspace session.
+
+New worktrees are created under `worktrees_dir`; it defaults to `projects_dir`
+so they appear in the dashboard's **Change Workspace** picker. Git itself
+prevents checking out a branch in multiple worktrees at once.

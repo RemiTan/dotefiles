@@ -4,6 +4,9 @@ return {
   -- Parent directory whose direct child folders appear in the workspace picker.
   projects_dir = "~/workspace",
 
+  -- Parent directory for new Git worktrees. Defaults to projects_dir.
+  worktrees_dir = "~/workspace",
+
   -- Optional interpreter override for basedpyright. Leave nil to use project detection.
   python_interpreter = nil,
 

@@ -3,19 +3,41 @@ local M = {}
 local settings = require "config.settings"
 local projects_dir = settings.projects_dir and vim.fn.expand(settings.projects_dir)
 
-local function set_workspace(path)
+function M.save_modified_buffers()
+  local ok, err = pcall(vim.cmd, "wall")
+  if not ok then
+    vim.notify("Could not save modified buffers: " .. tostring(err), vim.log.levels.ERROR)
+    return false
+  end
+
+  for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_is_loaded(buffer) and vim.api.nvim_get_option_value("modified", { buf = buffer }) then
+      vim.notify("Some buffers are still modified; switch cancelled to protect your changes", vim.log.levels.ERROR)
+      return false
+    end
+  end
+
+  return true
+end
+
+function M.set_workspace(path)
   if vim.fn.isdirectory(path) ~= 1 then
     vim.notify("Workspace directory does not exist: " .. path, vim.log.levels.WARN)
-    return
+    return false
+  end
+
+  if not M.save_modified_buffers() then
+    return false
   end
 
   vim.cmd.cd(vim.fn.fnameescape(path))
   if Snacks and Snacks.dashboard then
     Snacks.dashboard.update()
   end
+  return true
 end
 
-function M.pick()
+function M.pick(on_selected)
   if not projects_dir or vim.fn.isdirectory(projects_dir) ~= 1 then
     vim.notify("Set a valid projects_dir in ~/.nvim-local.lua", vim.log.levels.WARN)
     return
@@ -44,7 +66,9 @@ function M.pick()
     end,
   }, function(project)
     if project then
-      set_workspace(project.path)
+      if M.set_workspace(project.path) and on_selected then
+        vim.schedule(on_selected)
+      end
     end
   end)
 end
