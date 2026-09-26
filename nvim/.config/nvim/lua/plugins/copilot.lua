@@ -1,3 +1,5 @@
+local settings = require "config.settings"
+
 return {
   "zbirenbaum/copilot.lua",
   requires = {
@@ -36,7 +38,7 @@ return {
         },
       },
       auth_provider_url = nil, -- URL to authentication provider, if not "https://github.com/"
-      copilot_node_command = "node", -- Node.js version must be > 22
+      copilot_node_command = settings.copilot_node_command and vim.fn.expand(settings.copilot_node_command) or "node",
       workspace_folders = {},
       copilot_model = "",
       disable_limit_reached_message = false, -- Set to `true` to suppress completion limit reached popup

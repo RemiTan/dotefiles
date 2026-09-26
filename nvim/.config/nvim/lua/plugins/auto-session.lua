@@ -1,3 +1,5 @@
+local settings = require "config.settings"
+
 return {
   "rmagatti/auto-session",
   lazy = false,
@@ -9,7 +11,8 @@ return {
     -- log_level = "debug",
     auto_restore_enabled = false,
     auto_save = true,
-    auto_session_suppress_dirs = { "~/", "~/Dev/", "~/Downloads", "~/Documents", "~/Desktop/" },
+    auto_session_suppress_dirs = settings.session_suppressed_dirs
+      or { "~/", "~/Downloads", "~/Documents", "~/Desktop/" },
     use_git_branch = true, -- Include git branch name in session name
   },
 }

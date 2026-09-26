@@ -1,6 +1,7 @@
 local M = {}
 
-local projects_dir = "/home/remi/workspace"
+local settings = require "config.settings"
+local projects_dir = settings.projects_dir and vim.fn.expand(settings.projects_dir)
 
 local function set_workspace(path)
   if vim.fn.isdirectory(path) ~= 1 then
@@ -15,8 +16,8 @@ local function set_workspace(path)
 end
 
 function M.pick()
-  if vim.fn.isdirectory(projects_dir) ~= 1 then
-    vim.notify("Projects directory does not exist: " .. projects_dir, vim.log.levels.WARN)
+  if not projects_dir or vim.fn.isdirectory(projects_dir) ~= 1 then
+    vim.notify("Set a valid projects_dir in ~/.nvim-local.lua", vim.log.levels.WARN)
     return
   end
 

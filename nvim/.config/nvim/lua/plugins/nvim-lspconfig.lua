@@ -1,3 +1,5 @@
+local settings = require "config.settings"
+
 return {
   -- Main LSP Configuration
   "neovim/nvim-lspconfig",
@@ -310,7 +312,7 @@ return {
             },
           },
           python = {
-            pythonPath = "~/miniconda3/envs/csu/bin/python",
+            pythonPath = settings.python_interpreter and vim.fn.expand(settings.python_interpreter) or nil,
           },
         },
 

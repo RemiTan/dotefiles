@@ -207,7 +207,7 @@ return {
             return Snacks.git.get_root() ~= nil
           end,
           padding = 1,
-          ttl = 5 * 60,
+          ttl = 0,
           indent = 3,
           icon = " ",
           title = "Open PRs",
