@@ -29,11 +29,12 @@ For daily navigation, use `<leader>ff` to fuzzy-find project files, `<leader>fb`
 to switch between open buffers, and `<leader>gt` to browse changed files. Use
 `<leader>gg` for Neogit staging, commits, pulls, and merges; `<leader>do` opens
 the full Diffview and `<leader>dp` closes it. Use `<leader>gh` or
-`:GitFileHistory` to browse commits for the current file; the picker previews
-the selected commit's file changes on the right, and Enter checks out that
-file version. If switching branches is blocked by local tracked or untracked
-changes, Neovim asks whether to stash them and retry; the stash remains
-available through Neogit or `git stash pop`.
+`:DiffviewFileHistory %` to browse the current file's history in Diffview.
+Selecting a commit previews its diff without changing the file; press `X` in
+the history panel to explicitly restore the file to that revision. If switching
+branches is blocked by local tracked or untracked changes, Neovim asks whether
+to stash them and retry; the stash remains available through Neogit or
+`git stash pop`.
 
 New worktrees are created under `worktrees_dir`; it defaults to `projects_dir`
 so they appear in the dashboard's **Change Workspace** picker. Git itself
