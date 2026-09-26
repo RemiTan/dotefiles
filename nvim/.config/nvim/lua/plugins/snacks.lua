@@ -179,7 +179,7 @@ return {
           ttl = 0,
           indent = 3,
           title = "Notifications",
-          cmd = [[gh api notifications --jq 'if length == 0 then "No unread notifications" else .[0:5][] | "\(.subject.title) · \(.repository.full_name)" end']],
+          cmd = [[gh api notifications --jq 'if length == 0 then "No unread notifications" else .[0:5][] | "\(.subject.title[0:34])… · \(.repository.name[0:18])" end']],
           action = function()
             vim.ui.open "https://github.com/notifications"
           end,
