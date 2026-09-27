@@ -58,13 +58,11 @@ return {
           return false
         end
 
-        if not vim.bo[buf_id].buflisted then
-          vim.notify("not attaching, buffer is not 'buflisted'", vim.log.levels.DEBUG)
+        if vim.bo[buf_id].buftype ~= "" then
           return false
         end
 
-        if vim.bo[buf_id].buftype ~= "" then
-          vim.notify("not attaching, buffer 'buftype' is " .. vim.bo[buf_id].buftype, vim.log.levels.DEBUG)
+        if not vim.bo[buf_id].buflisted then
           return false
         end
 

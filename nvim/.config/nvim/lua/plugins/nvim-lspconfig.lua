@@ -1,4 +1,14 @@
 local settings = require "config.settings"
+local python_interpreter = settings.python_interpreter and vim.fn.expand(settings.python_interpreter) or nil
+
+-- When Neovim itself runs in a Dev Container, use that container's Python
+-- interpreter for basedpyright instead of a host-only path from local config.
+if vim.env.NVIM_DEVCONTAINER == "1" then
+  local container_python = vim.fn.exepath "python3"
+  if container_python ~= "" then
+    python_interpreter = container_python
+  end
+end
 
 return {
   -- Main LSP Configuration
@@ -100,17 +110,13 @@ return {
         --  the definition of its *type*, not where it was *defined*.
         map("gt", require("telescope.builtin").lsp_type_definitions, "[G]oto [T]ype Definition")
 
-        -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
+        -- This config uses Neovim's current client method API.
         ---@param client vim.lsp.Client
         ---@param method vim.lsp.protocol.Method
         ---@param bufnr? integer some lsp support methods only in specific files
         ---@return boolean
         local function client_supports_method(client, method, bufnr)
-          if vim.fn.has "nvim-0.11" == 1 then
-            return client:supports_method(method, bufnr)
-          else
-            return client.supports_method(method, { bufnr = bufnr })
-          end
+          return client:supports_method(method, bufnr)
         end
 
         -- The following two autocommands are used to highlight references of the
@@ -290,9 +296,9 @@ return {
 
       basedpyright = {
         capabilities = capabilities,
+        filetypes = { "python" },
 
         settings = {
-          filetypes = { "python" },
           basedpyright = {
             disableOrganizeImports = true,
             inlayHints = {
@@ -312,7 +318,7 @@ return {
             },
           },
           python = {
-            pythonPath = settings.python_interpreter and vim.fn.expand(settings.python_interpreter) or nil,
+            pythonPath = python_interpreter,
           },
         },
 
@@ -350,25 +356,22 @@ return {
       "ruff",
       "basedpyright",
       "gopls",
+      "debugpy", -- Python debugger used by nvim-dap-python
     })
     require("mason-tool-installer").setup { ensure_installed = ensure_installed }
 
+    -- Configure servers through Neovim's native LSP API. Recent
+    -- mason-lspconfig versions removed the legacy `handlers` callback and
+    -- automatically enable installed servers with their default settings.
+    for server_name, server in pairs(servers) do
+      server.flags = vim.tbl_deep_extend("force", { debounce_text_changes = 150 }, server.flags or {})
+      server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+      vim.lsp.config(server_name, server)
+    end
+
     require("mason-lspconfig").setup {
-      ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
-      automatic_installation = false,
-      handlers = {
-        function(server_name)
-          local server = servers[server_name] or {}
-          server.flags = {
-            debounce_text_changes = 150,
-          }
-          -- This handles overriding only values explicitly passed
-          -- by the server configuration above. Useful when disabling
-          -- certain features of an LSP (for example, turning off formatting for ts_ls)
-          server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-          require("lspconfig")[server_name].setup(server)
-        end,
-      },
+      ensure_installed = {}, -- mason-tool-installer manages installation
+      automatic_enable = true,
     }
   end,
 }

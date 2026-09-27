@@ -3,9 +3,12 @@ vim.keymap.set("n", "-", "<cmd>Oil --float<CR>", { desc = "Open Parent Directory
 local map = vim.keymap.set
 
 local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
+local terminal_workspace = require "config.terminal_workspace"
 require "config.git_worktree"
+require "config.oil_ssh"
 
 map("n", "<leader>gb", "<cmd>GitBranch<CR>", { desc = "Switch Git branch" })
+map("n", "<leader>gc", "<cmd>GitCheckoutCommit<CR>", { desc = "Checkout Git commit" })
 map("n", "<leader>gw", "<cmd>GitWorktree<CR>", { desc = "Switch or create Git worktree" })
 
 -- lsp key maps
@@ -49,6 +52,55 @@ map("n", "<C-Down>", ":resize -5<CR>", { desc = "Decrease split height" })
 map("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease split width" })
 map("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase split width" })
 
+local function move_window_border(direction, amount)
+  local current = vim.api.nvim_get_current_win()
+  local cx, cy = vim.api.nvim_win_get_position(current)[2], vim.api.nvim_win_get_position(current)[1]
+  local cw, ch = vim.api.nvim_win_get_width(current), vim.api.nvim_win_get_height(current)
+  local current_edge = direction == "left" and cx or direction == "right" and cx + cw
+    or direction == "up" and cy or cy + ch
+  local best, best_gap, best_overlap
+
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if win ~= current and vim.api.nvim_win_get_config(win).relative == "" then
+      local pos = vim.api.nvim_win_get_position(win)
+      local x, y = pos[2], pos[1]
+      local w, h = vim.api.nvim_win_get_width(win), vim.api.nvim_win_get_height(win)
+      local gap, overlap
+      if direction == "left" or direction == "right" then
+        overlap = math.min(cy + ch, y + h) - math.max(cy, y)
+        local edge = direction == "left" and x + w or x
+        gap = direction == "left" and current_edge - edge or edge - current_edge
+      else
+        overlap = math.min(cx + cw, x + w) - math.max(cx, x)
+        local edge = direction == "up" and y + h or y
+        gap = direction == "up" and current_edge - edge or edge - current_edge
+      end
+
+      if overlap > 0 and gap >= 0 and (not best or gap < best_gap or (gap == best_gap and overlap > best_overlap)) then
+        best, best_gap, best_overlap = win, gap, overlap
+      end
+    end
+  end
+
+  if not best then
+    vim.notify("No window border in that direction", vim.log.levels.INFO)
+    return
+  end
+
+  if direction == "left" or direction == "right" then
+    local min_width = vim.api.nvim_get_option_value("winminwidth", {})
+    vim.api.nvim_win_set_width(best, math.max(min_width, vim.api.nvim_win_get_width(best) - amount))
+  else
+    local min_height = vim.api.nvim_get_option_value("winminheight", {})
+    vim.api.nvim_win_set_height(best, math.max(min_height, vim.api.nvim_win_get_height(best) - amount))
+  end
+end
+
+map("n", "<C-S-h>", function() move_window_border("left", 2) end, { desc = "Move window border left" })
+map("n", "<C-S-l>", function() move_window_border("right", 2) end, { desc = "Move window border right" })
+map("n", "<C-S-k>", function() move_window_border("up", 2) end, { desc = "Move window border up" })
+map("n", "<C-S-j>", function() move_window_border("down", 2) end, { desc = "Move window border down" })
+
 -- map("n", "<C-c>", "<Nop>", { desc = "stop flashing" })
 
 map("n", "<Esc>", "<cmd>noh<CR>", { desc = "general clear highlights" })
@@ -69,6 +121,32 @@ map("n", "<leader><leader>x", "<cmd>source %<CR>", { desc = "execute" })
 
 -- tabufline
 map("n", "<leader>b", "<cmd>enew<CR>", { desc = "buffer new" })
+map("n", "<leader>br", function()
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].filetype == "snacks_dashboard" then
+    local alternate = vim.fn.bufnr "#"
+    if alternate > 0 and vim.api.nvim_buf_is_loaded(alternate) then
+      buf = alternate
+    end
+  end
+
+  if vim.api.nvim_buf_get_name(buf) == "" or vim.bo[buf].buftype ~= "" then
+    vim.notify("No file buffer to reload", vim.log.levels.WARN)
+    return
+  end
+
+  if vim.bo[buf].modified then
+    local choice = vim.fn.confirm("Discard unsaved changes and reload this buffer?", "&Reload\n&Cancel", 2)
+    if choice ~= 1 then
+      return
+    end
+  end
+
+  vim.api.nvim_buf_call(buf, function()
+    vim.cmd "edit!"
+  end)
+  vim.notify("Buffer reloaded", vim.log.levels.INFO)
+end, { desc = "Buffer reload" })
 
 -- Comment
 map("n", "<leader>cc", "gcc", { desc = "toggle comment", remap = true })
@@ -191,14 +269,16 @@ map("n", "<leader>uf", "<cmd>UndotreeFocus<CR>", { desc = "Focus undotree" })
 
 --
 
-map({ "n", "t" }, "<A-i>", "<cmd>1ToggleTerm direction=float <CR>", { desc = "Floating Terminal" })
-map({ "n", "t" }, "<A-v>", "<cmd>2ToggleTerm direction=vertical size=50<CR>", { desc = "Vertical Terminal" })
+map({ "n", "t" }, "<A-i>", "<cmd>1ToggleTerm direction=float<CR>", { desc = "Floating Terminal" })
+map({ "n", "t" }, "<M-v>", terminal_workspace.toggle, { desc = "Toggle terminal workspace" })
+map("n", "<leader>tv", terminal_workspace.vertical, { desc = "Add vertical terminal to workspace" })
+map("n", "<leader>th", terminal_workspace.horizontal, { desc = "Add horizontal terminal to workspace" })
 map("t", "<C-x>", [[<C-\><C-n>]], { desc = "Exit Terminal Mode" })
 
 --------------HARPOON-------------------
 
 map("n", "<leader>ha", function()
-  require("harpoon"):list():add()
+  require("config.harpoon_tabline").add()
 end, { desc = "Harpoon [A]dd" })
 
 map("n", "<leader>hh", function()
@@ -207,11 +287,11 @@ map("n", "<leader>hh", function()
 end, { desc = "Toggle quick menu [H]arpoon" })
 
 map("n", "<M-a>", function()
-  require("harpoon"):list():select(1)
+  require("config.harpoon_tabline").toggle(1)
 end, { desc = "Select 1 menu [H]arpoon" })
 
 map("n", "<M-z>", function()
-  require("harpoon"):list():select(2)
+  require("config.harpoon_tabline").toggle(2)
 end, { desc = "select 2 menu [h]arpoon" })
 
 map("n", "<M-e>", function()

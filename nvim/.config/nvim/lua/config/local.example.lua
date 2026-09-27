@@ -7,6 +7,12 @@ return {
   -- Parent directory for new Git worktrees. Defaults to projects_dir.
   worktrees_dir = "~/workspace",
 
+  -- SSH destinations shown by :OilSSH. Use host aliases from ~/.ssh/config.
+  remote_ssh_hosts = {
+    -- { name = "Dev server", host = "dev-server", path = "/home/remi/workspace" },
+    -- { name = "Build machine", host = "build-box", path = "/srv/projects" },
+  },
+
   -- Optional interpreter override for basedpyright. Leave nil to use project detection.
   python_interpreter = nil,
 

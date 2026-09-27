@@ -47,10 +47,13 @@ local function local_branches(root)
   return output
 end
 
-local function switch_branch(root, branch)
-  local output, code = git(root, { "switch", branch })
+local function switch_to(root, target, destination, refresh_buffers)
+  local output, code = git(root, { "switch", target })
   if code == 0 then
-    vim.notify("Switched to " .. branch)
+    if refresh_buffers then
+      vim.cmd.checktime()
+    end
+    vim.notify("Switched to " .. destination)
     return
   end
 
@@ -60,12 +63,12 @@ local function switch_branch(root, branch)
     or lower_message:find("local changes", 1, true)
     or lower_message:find("untracked working tree files", 1, true)
   if not has_local_changes then
-    notify_git_error("Switching to " .. branch, output)
+    notify_git_error("Switching to " .. destination, output)
     return
   end
 
   vim.ui.select({ "Stash changes and retry", "Cancel" }, {
-    prompt = "Git cannot switch branches with these local changes. Stash them and retry?",
+    prompt = "Git cannot switch with these local changes. Stash them and retry?",
   }, function(choice)
     if choice ~= "Stash changes and retry" then
       return
@@ -76,22 +79,29 @@ local function switch_branch(root, branch)
       "push",
       "--include-untracked",
       "-m",
-      "Neovim: switch to " .. branch,
+      "Neovim: switch to " .. destination,
     })
     if stash_code ~= 0 then
       notify_git_error("Stashing changes", stash_output)
       return
     end
 
-    local retry_output, retry_code = git(root, { "switch", branch })
+    local retry_output, retry_code = git(root, { "switch", target })
     if retry_code ~= 0 then
-      notify_git_error("Switching to " .. branch .. " after stashing", retry_output)
+      notify_git_error("Switching to " .. destination .. " after stashing", retry_output)
       vim.notify("Your changes remain saved in Git stash; apply them later with :Neogit or git stash pop")
       return
     end
 
-    vim.notify("Switched to " .. branch .. ". Your changes are saved in Git stash@{0}.")
+    if refresh_buffers then
+      vim.cmd.checktime()
+    end
+    vim.notify("Switched to " .. destination .. ". Your changes are saved in Git stash@{0}.")
   end)
+end
+
+local function switch_branch(root, branch)
+  switch_to(root, branch, "branch " .. branch)
 end
 
 function M.pick_branch()
@@ -116,6 +126,66 @@ function M.pick_branch()
       end
       switch_branch(root, branch)
     end)
+  end)
+end
+
+local function pick_commit_from_branch(root, branch)
+  local output, code = git(root, {
+    "log",
+    "--date=short",
+    "--format=%H%x09%h%x09%ad%x09%s",
+    "-n",
+    "200",
+    branch,
+  })
+  if code ~= 0 then
+    notify_git_error("Listing commits for " .. branch, output)
+    return
+  end
+
+  local commits = {}
+  for _, line in ipairs(output) do
+    local hash, short_hash, date, subject = line:match("^([^\t]+)\t([^\t]+)\t([^\t]+)\t(.*)$")
+    if hash then
+      table.insert(commits, { hash = hash, short_hash = short_hash, date = date, subject = subject })
+    end
+  end
+  if #commits == 0 then
+    vim.notify("No commits found for " .. branch, vim.log.levels.INFO)
+    return
+  end
+
+  vim.ui.select(commits, {
+    prompt = "Checkout commit from " .. branch,
+    format_item = function(commit)
+      return string.format("%s  %s  %s", commit.short_hash, commit.date, commit.subject)
+    end,
+  }, function(commit)
+    if not commit or not require("config.projects").save_modified_buffers() then
+      return
+    end
+    switch_to(root, commit.hash, commit.short_hash .. " from " .. branch .. " (detached HEAD)", true)
+  end)
+end
+
+function M.pick_commit(branch)
+  with_repository(function(root)
+    local function choose_branch(selected_branch)
+      if selected_branch then
+        pick_commit_from_branch(root, selected_branch)
+      end
+    end
+
+    if branch and branch ~= "" then
+      choose_branch(branch)
+      return
+    end
+
+    local branches = local_branches(root)
+    if not branches then
+      return
+    end
+    vim.ui.select(branches, { prompt = "Choose branch for commit checkout" }, choose_branch)
   end)
 end
 
@@ -293,5 +363,8 @@ end
 
 vim.api.nvim_create_user_command("GitBranch", M.pick_branch, { desc = "Switch Git branch and restore its session" })
 vim.api.nvim_create_user_command("GitWorktree", M.pick_worktree, { desc = "Open or create Git worktrees" })
+vim.api.nvim_create_user_command("GitCheckoutCommit", function(opts)
+  M.pick_commit(opts.args)
+end, { nargs = "?", desc = "Choose a commit from a branch and check it out" })
 
 return M

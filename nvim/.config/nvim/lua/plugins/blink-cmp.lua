@@ -69,6 +69,10 @@ return {
       ["<CR>"] = { "accept", "fallback" },
       ["<Tab>"] = {
         function(cmp)
+          -- Choose Blink's visible completion before handling snippets or Copilot NES.
+          if cmp.is_visible() then
+            return cmp.select_and_accept()
+          end
           if vim.b[vim.api.nvim_get_current_buf()].nes_state then
             cmp.hide()
             return (
@@ -77,13 +81,10 @@ return {
             )
           end
           if cmp.snippet_active() then
-            return cmp.accept()
-          else
-            return cmp.select_and_accept()
+            return cmp.snippet_forward()
           end
+          return false
         end,
-        "snippet_forward",
-        "accept",
         "fallback",
       },
     },
