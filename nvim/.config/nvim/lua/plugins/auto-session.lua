@@ -1,4 +1,5 @@
 local settings = require "config.settings"
+local neogit_session = require "config.neogit_session"
 
 local function start_git_branch_watcher(is_startup)
   if is_startup then
@@ -6,6 +7,12 @@ local function start_git_branch_watcher(is_startup)
     -- branch changes can restore sessions after startup has finished.
     require("auto-session.config").auto_restore = true
   else
+    -- AutoSession also calls this when the selected branch has no session.
+    -- Defer its stale-buffer cleanup until the Neogit status view is closed.
+    if neogit_session.defer_until_neogit_closes() then
+      return
+    end
+
     -- If a branch has no saved session, close stale file buffers from the
     -- previous branch. Startup is excluded so the dashboard stays visible.
     for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
@@ -45,6 +52,8 @@ return {
     git_use_branch_name = true,
     git_auto_restore_on_branch_change = true,
     pre_cwd_changed_cmds = { "wall" },
+    pre_save_cmds = { neogit_session.before_session_save },
+    pre_restore_cmds = { neogit_session.before_session_restore },
     -- AutoSession starts its watcher after restoring a session. Start it on
     -- first use too, so a new branch/worktree can be saved before it has a session.
     no_restore_cmds = { start_git_branch_watcher },
