@@ -1,6 +1,6 @@
 return {
-  dir = vim.fn.expand "~/container.nvim",
-  name = "container.nvim",
+  "RemiTan/container.nvim",
+  branch = "main",
   cmd = { "ContainerAttach", "ContainerLog", "ContainerResume" },
   opts = {
     config_mode = "copy",

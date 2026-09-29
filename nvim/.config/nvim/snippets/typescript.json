@@ -1,0 +1,12 @@
+{
+  "Import named symbols": {
+    "prefix": "imp",
+    "body": ["import { ${1:name} } from '${2:module}';"],
+    "description": "Import named symbols from a module"
+  },
+  "Console log": {
+    "prefix": "clog",
+    "body": ["console.log('${1:label}', ${2:value});"],
+    "description": "Log a label and value"
+  }
+}

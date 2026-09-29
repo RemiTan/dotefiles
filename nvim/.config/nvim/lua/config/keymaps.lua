@@ -4,6 +4,7 @@ local map = vim.keymap.set
 
 local ts_repeat_move = require "nvim-treesitter-textobjects.repeatable_move"
 local terminal_workspace = require "config.terminal_workspace"
+local copilot_workspace = require "config.copilot_workspace"
 require "config.git_worktree"
 require "config.oil_ssh"
 
@@ -58,7 +59,7 @@ local function move_window_border(direction, amount)
   local cw, ch = vim.api.nvim_win_get_width(current), vim.api.nvim_win_get_height(current)
   local current_edge = direction == "left" and cx or direction == "right" and cx + cw
     or direction == "up" and cy or cy + ch
-  local best, best_gap, best_overlap
+  local best, best_overlap
 
   for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if win ~= current and vim.api.nvim_win_get_config(win).relative == "" then
@@ -76,8 +77,10 @@ local function move_window_border(direction, amount)
         gap = direction == "up" and current_edge - edge or edge - current_edge
       end
 
-      if overlap > 0 and gap >= 0 and (not best or gap < best_gap or (gap == best_gap and overlap > best_overlap)) then
-        best, best_gap, best_overlap = win, gap, overlap
+      -- Only resize a window that shares this exact border. Choosing a nearby
+      -- window across a gap made the wrong split move in nested layouts.
+      if overlap > 0 and gap == 0 and (not best or overlap > best_overlap) then
+        best, best_overlap = win, overlap
       end
     end
   end
@@ -89,10 +92,18 @@ local function move_window_border(direction, amount)
 
   if direction == "left" or direction == "right" then
     local min_width = vim.api.nvim_get_option_value("winminwidth", {})
-    vim.api.nvim_win_set_width(best, math.max(min_width, vim.api.nvim_win_get_width(best) - amount))
+    local width = math.max(min_width, vim.api.nvim_win_get_width(best) - amount)
+    local ok = pcall(vim.api.nvim_win_set_width, best, width)
+    if not ok then
+      vim.notify("Could not move that window border", vim.log.levels.INFO)
+    end
   else
     local min_height = vim.api.nvim_get_option_value("winminheight", {})
-    vim.api.nvim_win_set_height(best, math.max(min_height, vim.api.nvim_win_get_height(best) - amount))
+    local height = math.max(min_height, vim.api.nvim_win_get_height(best) - amount)
+    local ok = pcall(vim.api.nvim_win_set_height, best, height)
+    if not ok then
+      vim.notify("Could not move that window border", vim.log.levels.INFO)
+    end
   end
 end
 
@@ -270,9 +281,16 @@ map("n", "<leader>uf", "<cmd>UndotreeFocus<CR>", { desc = "Focus undotree" })
 --
 
 map({ "n", "t" }, "<A-i>", "<cmd>1ToggleTerm direction=float<CR>", { desc = "Floating Terminal" })
-map({ "n", "t" }, "<M-v>", terminal_workspace.toggle, { desc = "Toggle terminal workspace" })
+map({ "n", "t" }, "<M-v>", copilot_workspace.toggle, { desc = "Focus workspace panel" })
+map({ "n", "t" }, "<M-u>", copilot_workspace.toggle_chat, { desc = "Toggle Copilot chat panel" })
 map("n", "<leader>tv", terminal_workspace.vertical, { desc = "Add vertical terminal to workspace" })
 map("n", "<leader>th", terminal_workspace.horizontal, { desc = "Add horizontal terminal to workspace" })
+map({ "n", "t" }, "<leader>tc", copilot_workspace.hide, { desc = "Hide chat or terminal panel" })
+map({ "n", "t" }, "<leader>tz", copilot_workspace.toggle_zen, { desc = "Toggle full-screen chat or terminal" })
+map({ "n", "t" }, "<leader>tw", copilot_workspace.toggle_mode, { desc = "Switch Copilot panel between chat and shell" })
+map("n", "<leader>yf", "<cmd>CopilotFileRef<CR>", { desc = "Copy buffer reference for Copilot" })
+map("n", "<leader>yr", "<cmd>CopilotRef<CR>", { desc = "Copy line reference for Copilot" })
+map("x", "<leader>yr", ":CopilotRef<CR>", { desc = "Copy selection reference for Copilot" })
 map("t", "<C-x>", [[<C-\><C-n>]], { desc = "Exit Terminal Mode" })
 
 --------------HARPOON-------------------

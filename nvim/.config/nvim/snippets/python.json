@@ -1,0 +1,12 @@
+{
+  "Import module": {
+    "prefix": "imp",
+    "body": ["import ${1:module}"],
+    "description": "Import a module"
+  },
+  "Log with Python logging": {
+    "prefix": "ilog",
+    "body": ["import logging", "logging.info('${1:message}: %s', ${2:value})"],
+    "description": "Log a value using the logging module"
+  }
+}

@@ -24,4 +24,7 @@ return {
 
   -- Optional Node.js executable for Copilot. Leave nil to use `node` from PATH.
   copilot_node_command = nil,
+
+  -- Command used by the M-v Copilot CLI panel. Accepts a command string or argv table.
+  copilot_cli_command = "copilot",
 }
